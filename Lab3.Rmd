@@ -1,3 +1,26 @@
+```{r load_packages, echo = FALSE}
+
+# install.packages("tidyr")
+# install.packages("dplyr")
+# install.packages("XML")
+# install.packages("httr")
+# install.packages("rvest")
+# install.packages("purrr")
+# install.packages("ggplot2")
+# install.packages("readr")
+
+# load libraries
+library(readr)
+library(tidyr)
+library(dplyr)
+library(XML)
+library(httr)
+library(rvest)
+library(knitr)
+library(purrr)
+library(ggplot2)
+```
+
 ---
 title: "Lab3"
 author: "Grupo 5"
@@ -9,22 +32,38 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Dataframe
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r dataframe, echo=TRUE, }
+epa_http <- read_table("C:/Users/auguriora/Downloads/epa-http/epa-http.csv",
+col_names = FALSE)
 ```
 
-## Including Plots
+## Obtención y carga de los Datos:
+Pregunta 1: Formateo columnas de Dataframe
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r formatear, echo=FALSE}
+# renombrar columnas
+names(epa_http) <- c("ORIGEN","FECHA","TIPO","URL","PROTOCOLO","PETICIONES","BYTES")
+# formatear columna Tipo
+epa_http$TIPO <- gsub("\"", "", epa_http$TIPO)
+# formatear columna Protocolo
+epa_http$PROTOCOLO <- gsub("\"", "", epa_http$PROTOCOLO)
+# formatear columna Bytes
+epa_http$BYTES <- as.numeric(epa_http$BYTES)
+# formatear columna fecha y hora
+epa_http$FECHA <- gsub("\\[|\\]", "", epa_http$FECHA)
+epa_http$FECHA <- as.POSIXct(epa_http$FECHA, format = "%d:%H:%M:%S")
+# formatear columna Peticiones
+epa_http$PETICIONES <- factor(epa_http$PETICIONES)
+  
+#print(lapply(epa_http, class))
+#kable(epa_http, format = "html")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Exploración de Datos
+Pregunta 2: Usuarios con errores reportados
+
+```{r formatear, echo=FALSE}
+
+```

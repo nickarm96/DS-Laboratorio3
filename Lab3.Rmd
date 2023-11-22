@@ -8,6 +8,7 @@
 # install.packages("purrr")
 # install.packages("ggplot2")
 # install.packages("readr")
+# install.packages("mltools")
 
 # load libraries
 library(readr)
@@ -19,6 +20,7 @@ library(rvest)
 library(knitr)
 library(purrr)
 library(ggplot2)
+library(mltools)
 ```
 
 ---
@@ -100,7 +102,7 @@ kable(tipo_peticiones, format = "html")
 
 # Pregunta 4:
 
-Grafico
+Grafico con cantidad de interacciones fallidas y exitosas de los usuarios
 
 ```{r grafico1, echo=FALSE}
 tabla_interaccion <- data.frame("Error",num_filas_error)
@@ -113,7 +115,43 @@ nuevos_registros <- data.frame(
 
 tabla_interaccion <- rbind(tabla_interaccion, nuevos_registros)
 
-ggplot(tabla_interaccion, aes(x = Acceso, y = Interaccion)) + geom_bar(stat = "identity")
-  #geom_col()
+ggplot(tabla_interaccion, aes(x = Acceso, y = Interaccion, fill=Interaccion)) + geom_col()
+```
+Grafico con tipo de peticiones
+
+```{r grafico2, echo=FALSE}
+
+names(tipo_peticiones) <- c("Tipo","Cantidad_Peticiones")
+ggplot(tipo_peticiones, aes(x = "", y = Tipo, fill = Tipo)) + geom_bar(stat = "identity", width = 1) + coord_polar("y", start = 0) + geom_text(aes(x = "", y = Tipo, label = Cantidad_Peticiones)) 
+
+
 ```
 
+# Pregunta 5:
+
+# Pregunta 6:
+
+
+```{r P6, echo=FALSE}
+# convertir campos a factor
+
+  epa_http_one_hot <- epa_http %>% mutate(
+    TIPO = as.factor(TIPO), 
+    PROTOCOLO = as.factor(PROTOCOLO),
+    PETICIONES = as.factor(PETICIONES),
+    BYTES = as.factor(BYTES)
+    )
+  
+# Eliminar tablas no numericas
+  epa_http_one_hot$ORIGEN <- NULL
+  epa_http_one_hot$FECHA <- NULL
+  epa_http_one_hot$URL <- NULL
+
+  print(lapply(epa_http_one_hot, class))
+  
+epa_http_one_hot <-select(epa_http_one_hot, TIPO, PROTOCOLO, PETICIONES, BYTES)
+
+epa_http_one_hot <- one_hot(as.data.table(epa_http), sparsifyNAs = TRUE)
+
+
+```

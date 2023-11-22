@@ -9,6 +9,8 @@
 # install.packages("ggplot2")
 # install.packages("readr")
 # install.packages("mltools")
+# install.packages("data.table")
+# install.packages("knitr")
 
 # load libraries
 library(readr)
@@ -21,6 +23,7 @@ library(knitr)
 library(purrr)
 library(ggplot2)
 library(mltools)
+library(data.table)
 ```
 
 ---
@@ -133,7 +136,7 @@ ggplot(tipo_peticiones, aes(x = "", y = Tipo, fill = Tipo)) + geom_bar(stat = "i
 
 
 ```{r P6, echo=FALSE}
-# convertir campos a factor
+# convertir campos a tipo factor
 
   epa_http_one_hot <- epa_http %>% mutate(
     TIPO = as.factor(TIPO), 
@@ -147,11 +150,18 @@ ggplot(tipo_peticiones, aes(x = "", y = Tipo, fill = Tipo)) + geom_bar(stat = "i
   epa_http_one_hot$FECHA <- NULL
   epa_http_one_hot$URL <- NULL
 
-  print(lapply(epa_http_one_hot, class))
+#  print(lapply(epa_http_one_hot, class))
+
+# transformar na a 0 para usar kmeans
+#epa_http$BYTES[is.na(epa_http_one_hot$BYTES), ] <- 0
+
+epa_http$BYTES[epa_http_one_hot$BYTES = NA_character_] <- 0
+
+#EJECUTAR KMEANS
+resultado <- kmeans(epa_http_one_hot, centers = 2)
+resultado <- kmeans(na.omit(epa_http_one_hot), centers = 2)
   
-epa_http_one_hot <-select(epa_http_one_hot, TIPO, PROTOCOLO, PETICIONES, BYTES)
-
-epa_http_one_hot <- one_hot(as.data.table(epa_http), sparsifyNAs = TRUE)
-
+plot(epa_http_one_hot, col=resultado$cluster)
+View(epa_http)
 
 ```

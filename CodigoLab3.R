@@ -24,7 +24,4 @@ epa_http_one_hot$FECHA <- NULL
 epa_http_one_hot$URL <- NULL
 
 print(lapply(epa_http_one_hot, class))
-  
-epa_http_one_hot <-select(epa_http, TIPO, PROTOCOLO, PETICIONES, BYTES)
 
-epa_http_one_hot <- one_hot(as.data.table(epa_http), sparsifyNAs = TRUE)

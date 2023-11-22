@@ -131,6 +131,9 @@ ggplot(tipo_peticiones, aes(x = "", y = Tipo, fill = Tipo)) + geom_bar(stat = "i
 ```
 
 # Pregunta 5:
+```{r P5, echo=FALSE}
+hist(x=epa_http$FECHA, breaks = "hours", freq = TRUE, xlab = "Cantidad de peticiones por Dia", main = "Cantidad de peticiones en el tiempo")
+```
 
 # Pregunta 6:
 
@@ -138,29 +141,31 @@ ggplot(tipo_peticiones, aes(x = "", y = Tipo, fill = Tipo)) + geom_bar(stat = "i
 ```{r P6, echo=FALSE}
 # convertir campos a tipo factor
 
-  epa_http_one_hot <- epa_http %>% mutate(
-    TIPO = as.factor(TIPO), 
-    PROTOCOLO = as.factor(PROTOCOLO),
-    PETICIONES = as.factor(PETICIONES),
-    BYTES = as.factor(BYTES)
-    )
-  
-# Eliminar tablas no numericas
-  epa_http_one_hot$ORIGEN <- NULL
-  epa_http_one_hot$FECHA <- NULL
-  epa_http_one_hot$URL <- NULL
 
-#  print(lapply(epa_http_one_hot, class))
+epa_http$TIPO <- as.factor(epa_http$TIPO)
+epa_http$PROTOCOLO <-  as.factor(epa_http$PROTOCOLO)
+epa_http$PETICIONES <-  as.factor(epa_http$PETICIONES)
+epa_http$BYTES <-  as.factor(epa_http$BYTES)
+   
+
+epa_http_one_hot <-  one_hot(as.data.table(epa_http, sparsifyNAs = TRUE))
+
+# Eliminar tablas no numericas
+epa_http_one_hot$ORIGEN <- NULL
+epa_http_one_hot$FECHA <- NULL
+epa_http_one_hot$URL <- NULL
+
+#print(lapply(epa_http_one_hot, class))
 
 # transformar na a 0 para usar kmeans
-#epa_http$BYTES[is.na(epa_http_one_hot$BYTES), ] <- 0
+epa_http$BYTES[is.na(epa_http_one_hot$BYTES), ] <- 0
 
-epa_http$BYTES[epa_http_one_hot$BYTES = NA_character_] <- 0
+#epa_http$BYTES_SENT[epa_http_one_hot$BYTES_SENT == NA_character_] <- 0
 
 #EJECUTAR KMEANS
 resultado <- kmeans(epa_http_one_hot, centers = 2)
 resultado <- kmeans(na.omit(epa_http_one_hot), centers = 2)
-  
+
 plot(epa_http_one_hot, col=resultado$cluster)
 View(epa_http)
 

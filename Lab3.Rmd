@@ -40,7 +40,8 @@ col_names = FALSE)
 ```
 
 ## Obtención y carga de los Datos:
-Pregunta 1: Formateo columnas de Dataframe
+# Pregunta 1: 
+Formateo columnas de Dataframe
 
 ```{r formatear, echo=FALSE}
 # renombrar columnas
@@ -55,15 +56,64 @@ epa_http$BYTES <- as.numeric(epa_http$BYTES)
 epa_http$FECHA <- gsub("\\[|\\]", "", epa_http$FECHA)
 epa_http$FECHA <- as.POSIXct(epa_http$FECHA, format = "%d:%H:%M:%S")
 # formatear columna Peticiones
-epa_http$PETICIONES <- factor(epa_http$PETICIONES)
-  
-#print(lapply(epa_http, class))
+#epa_http$PETICIONES <- factor(epa_http$PETICIONES)
+
+print(lapply(epa_http, class))
 #kable(epa_http, format = "html")
 ```
 
 ## Exploración de Datos
-Pregunta 2: Usuarios con errores reportados
+# Pregunta 2: 
+Usuarios con errores reportados
 
-```{r formatear, echo=FALSE}
+```{r usuarioserror, echo=FALSE}
+usuario_peticion <- unique(data.frame("ORIGEN" = epa_http$ORIGEN, "PETICIONES" = epa_http$PETICIONES))
 
+usuarios_error <- dplyr::filter(usuario_peticion, between(PETICIONES,400,599))
+usuarios_ok <- dplyr::filter(usuario_peticion, between(PETICIONES,200,399))
+
+usuarios_solo_error <-anti_join(usuarios_error, usuarios_ok, by = "ORIGEN")
+usuarios_solo_ok <-anti_join(usuarios_ok, usuarios_error, by = "ORIGEN")
+
+cantidad_error <- dim(usuarios_error)
+num_filas_error <- cantidad_error[1] 
+cantidad_ok <- dim(usuarios_ok)
+num_filas_ok <- cantidad_ok[1] 
+
+
+cantidad_solo_error <- dim(usuarios_solo_error)
+num_filas_solo_error <- cantidad_solo_error[1] 
+cantidad_solo_ok <- dim(usuarios_solo_ok)
+num_filas_solo_ok <- cantidad_solo_ok[1] 
+
+print(paste("Total de usuarios solo con errores:", num_filas_error))
+print(paste("Total de usuarios solo con accesso satisfactorios:", num_filas_ok))
 ```
+# Pregunta 3:
+Tabla con tipos de peticiones HTTP (GET, POST, PUT, DELETE) 
+
+```{r r, echo=FALSE}
+tipo_peticiones <- epa_http %>% group_by(TIPO) %>% count()
+
+kable(tipo_peticiones, format = "html")
+```
+
+# Pregunta 4:
+
+Grafico
+
+```{r grafico1, echo=FALSE}
+tabla_interaccion <- data.frame("Error",num_filas_error)
+names(tabla_interaccion) <- c("Acceso","Interaccion")
+
+nuevos_registros <- data.frame(
+  Acceso = c("SoloError", "Ok", "SoloOk"), 
+  Interaccion = c(num_filas_solo_error, num_filas_ok, num_filas_solo_ok)
+)
+
+tabla_interaccion <- rbind(tabla_interaccion, nuevos_registros)
+
+ggplot(tabla_interaccion, aes(x = Acceso, y = Interaccion)) + geom_bar(stat = "identity")
+  #geom_col()
+```
+
